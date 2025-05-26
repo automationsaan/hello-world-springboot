@@ -1,6 +1,6 @@
 # Automationsaan Hello World Spring Boot Project
 
-This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube/SonarCloud integration (using both Jenkins and local sonar-project.properties), Docker containerization, and automated quality checks.
+This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube/SonarCloud integration, Docker containerization, and automated quality checks.
 
 ## Technologies Used
 
@@ -11,6 +11,7 @@ This repository contains a simple Spring Boot REST API with a Jenkins pipeline f
 - **Jenkins**: CI/CD automation server (pipeline defined in `Jenkinsfile`).
 - **SonarQube/SonarCloud**: Static code analysis and quality gate enforcement.
 - **Docker**: Containerization of the Spring Boot application.
+- **JFrog Artifactory**: Artifact and Docker image repository.
 
 ## Project Structure
 
@@ -36,8 +37,9 @@ hello-world-springboot/
 - Exposes a REST endpoint at `/` that returns `Hello, World!`.
 - Includes a unit test to verify the application context loads.
 - Jenkins pipeline builds, tests, analyzes, and enforces code quality using SonarQube/SonarCloud.
+- Publishes the built JAR to JFrog Artifactory.
+- Builds and publishes a Docker image to JFrog Artifactory Docker registry.
 - Supports local SonarQube/SonarCloud analysis via `sonar-project.properties`.
-- Builds a Docker image for the Spring Boot application.
 
 ## Setup and Run Locally
 
@@ -129,8 +131,10 @@ The `Jenkinsfile` defines the following stages:
 - **SonarQube analysis**: Runs static code analysis.
 - **Quality Gate**: (Commented out/skipped if using SonarCloud free tier)
 - **Jar Publish**: Uploads the built JAR to JFrog Artifactory.
+- **Docker Build**: Builds the Docker image using the built JAR.
+- **Docker Publish**: Pushes the Docker image to JFrog Artifactory Docker registry.
 
-> Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, and SonarQube/SonarCloud integration.
+> Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, Docker, and SonarQube/SonarCloud integration.
 
 ## SonarQube/SonarCloud
 - The pipeline expects a SonarQube server named `sonarqube-server` and a scanner tool named `sonar-scanner` to be configured in Jenkins.

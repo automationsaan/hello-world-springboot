@@ -1,4 +1,9 @@
 def registry = 'https://automationsaan.jfrog.io' // Artifactory base URL (no trailing slash)
+def imageName = 'automationsaan.jfrog.io/hello-world-spring-docker-local/hello-world' // Docker image name with Artifactory repository path
+def version   = '0.0.1-SNAPSHOT' // Version of the Docker image
+
+def app // Define app variable globally for Docker build/publish stages
+
 // Jenkins Declarative Pipeline definition
 pipeline {
     agent {
@@ -88,6 +93,30 @@ pipeline {
                     buildInfo.env.collect() // Collect environment info for traceability
                     server.publishBuildInfo(buildInfo) // Publish build info to Artifactory
                     echo '<--------------- Jar Publish Ended --------------->'
+                }
+            }
+        }
+        // Docker Build stage: builds the Docker image using the built JAR
+        stage('Docker Build') {
+            steps {
+                script {
+                    echo '<--------------- Docker Build Started --------------->'
+                    // Build the Docker image and tag it with the version
+                    app = docker.build(imageName+":"+version)
+                    echo '<--------------- Docker Build Ends --------------->'
+                }
+            }
+        }
+        // Docker Publish stage: pushes the Docker image to Artifactory Docker registry
+        stage('Docker Publish') {
+            steps {
+                script {
+                    echo '<--------------- Docker Publish Started --------------->'
+                    // Authenticate with the Docker registry and push the image
+                    docker.withRegistry(registry, 'jfrog-artifact-cred') {
+                        app.push()
+                    }
+                    echo '<--------------- Docker Publish Ended --------------->'
                 }
             }
         }
