@@ -1,6 +1,6 @@
 # Hello World Spring Boot Project
 
-This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube integration, and automated quality checks.
+This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube integration (using both Jenkins and local sonar-project.properties), and automated quality checks.
 
 ## Technologies Used
 
@@ -9,7 +9,7 @@ This repository contains a simple Spring Boot REST API with a Jenkins pipeline f
 - **Maven**: Build automation and dependency management.
 - **JUnit 5**: Unit testing framework.
 - **Jenkins**: CI/CD automation server (pipeline defined in `Jenkinsfile`).
-- **SonarQube**: Static code analysis and quality gate enforcement.
+- **SonarQube/SonarCloud**: Static code analysis and quality gate enforcement.
 
 ## Project Structure
 
@@ -17,6 +17,8 @@ This repository contains a simple Spring Boot REST API with a Jenkins pipeline f
 hello-world-springboot/
 ├── Jenkinsfile
 ├── pom.xml
+├── sonar-project.properties
+├── README.md
 ├── src/
 │   ├── main/java/com/example/helloworldspringboot/
 │   │   ├── HelloWorldSpringbootApplication.java
@@ -30,12 +32,14 @@ hello-world-springboot/
 - Exposes a REST endpoint at `/` that returns `Hello, World!`.
 - Includes a unit test to verify the application context loads.
 - Jenkins pipeline builds, tests, analyzes, and enforces code quality using SonarQube.
+- Supports local SonarQube/SonarCloud analysis via `sonar-project.properties`.
 
 ## Setup and Run Locally
 
 ### Prerequisites
 - Java 21 (JDK)
 - Maven 3.9.9 or later
+- (Optional) SonarQube CLI or SonarScanner for local analysis
 
 ### Build and Run
 
@@ -83,6 +87,18 @@ mvn test
 mvn test
 ```
 
+### Run SonarQube/SonarCloud Analysis Locally
+
+1. **Generate code coverage report:**
+   ```powershell
+   mvn test jacoco:report
+   ```
+2. **Run SonarQube analysis:**
+   ```powershell
+   sonar-scanner
+   ```
+   (Make sure SonarScanner is installed and available in your PATH.)
+
 ## Jenkins Pipeline
 
 The `Jenkinsfile` defines the following stages:
@@ -93,8 +109,9 @@ The `Jenkinsfile` defines the following stages:
 
 > Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, and SonarQube integration.
 
-## SonarQube
+## SonarQube/SonarCloud
 - The pipeline expects a SonarQube server named `sonarqube-server` and a scanner tool named `sonar-scanner` to be configured in Jenkins.
+- For local analysis, the `sonar-project.properties` file is used and is compatible with SonarCloud.
 
 ## License
 This project is for demonstration and educational purposes.
