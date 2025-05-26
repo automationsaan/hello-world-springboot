@@ -1,3 +1,4 @@
+def registry = 'https://automationsaan.jfrog.io/' // Artifactory base URL
 // Jenkins Declarative Pipeline definition
 pipeline {
     agent {
@@ -44,19 +45,49 @@ pipeline {
                 }
             }
         }
-        // Quality Gate stage: waits for SonarQube quality gate result
-        stage('Quality Gate') {
+        // Quality Gate stage: skipped due to SonarCloud premium requirement
+        // stage('Quality Gate') {
+        //     steps {
+        //         echo "----------- Quality Gate started ----------"
+        //         script {
+        //             timeout(time: 15, unit: 'MINUTES') { // Wait up to 15 minutes
+        //                 def qg = waitForQualityGate() // Get quality gate result
+        //                 if (qg.status != 'OK') {
+        //                     error "Pipeline aborted due to quality gate failure: ${qg.status}" // Fail if not OK
+        //                 }
+        //             }
+        //         }
+        //         echo "----------- Quality Gate completed ----------"
+        //     }
+        // }
+        // Jar Publish stage: uploads the built JAR to Artifactory
+        stage('Jar Publish') {
             steps {
-                echo "----------- Quality Gate started ----------"
                 script {
-                    timeout(time: 15, unit: 'MINUTES') { // Wait up to 15 minutes
-                        def qg = waitForQualityGate() // Get quality gate result
-                        if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}" // Fail if not OK
+                    echo '<--------------- Jar Publish Started --------------->'
+                    // Create Artifactory server object
+                    def server = Artifactory.newServer url:registry+"/artifactory", credentialsId:"jfrog-artifact-cred"
+                    // Build properties for traceability
+                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
+                    // Upload spec: upload JAR(s) from target/ to Artifactory
+                    def uploadSpec = """
+                        {
+                          \"files\": [
+                            {
+                              \"pattern\": \"target/*.jar\",
+                              \"target\": \"libs-release-local/\",
+                              \"flat\": \"false\",
+                              \"props\" : \"${properties}\",
+                              \"exclusions\": [ \"*.sha1\", \"*.md5\"]
+                            }
+                          ]
                         }
-                    }
+                    """
+                    def buildInfo = server.upload(uploadSpec) // Upload the JAR
+                    buildInfo.env.collect() // Collect environment info
+                    server.publishBuildInfo(buildInfo) // Publish build info to Artifactory
+                    echo '<--------------- Jar Publish Ended --------------->'
                 }
-                echo "----------- Quality Gate completed ----------"
             }
         }
     }

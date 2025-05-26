@@ -1,6 +1,6 @@
 # Automationsaan Hello World Spring Boot Project
 
-This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube integration (using both Jenkins and local sonar-project.properties), and automated quality checks.
+This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube/SonarCloud integration (using both Jenkins and local sonar-project.properties), and automated quality checks.
 
 ## Technologies Used
 
@@ -31,7 +31,7 @@ hello-world-springboot/
 
 - Exposes a REST endpoint at `/` that returns `Hello, World!`.
 - Includes a unit test to verify the application context loads.
-- Jenkins pipeline builds, tests, analyzes, and enforces code quality using SonarQube.
+- Jenkins pipeline builds, tests, analyzes, and enforces code quality using SonarQube/SonarCloud.
 - Supports local SonarQube/SonarCloud analysis via `sonar-project.properties`.
 
 ## Setup and Run Locally
@@ -105,13 +105,15 @@ The `Jenkinsfile` defines the following stages:
 - **Build**: Compiles and tests the code.
 - **Test**: Generates test reports.
 - **SonarQube analysis**: Runs static code analysis.
-- **Quality Gate**: Waits for SonarQube quality gate result and fails if not passed.
+- **Quality Gate**: (Commented out/skipped if using SonarCloud free tier)
+- **Jar Publish**: Uploads the built JAR to JFrog Artifactory.
 
-> Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, and SonarQube integration.
+> Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, and SonarQube/SonarCloud integration.
 
 ## SonarQube/SonarCloud
 - The pipeline expects a SonarQube server named `sonarqube-server` and a scanner tool named `sonar-scanner` to be configured in Jenkins.
 - For local analysis, the `sonar-project.properties` file is used and is compatible with SonarCloud.
+- The Quality Gate stage is commented out by default for SonarCloud free tier users.
 
 ## License
 This project is for demonstration and educational purposes.
