@@ -1,4 +1,4 @@
-# Hello World Spring Boot Project
+# Automationsaan Hello World Spring Boot Project
 
 This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube integration (using both Jenkins and local sonar-project.properties), and automated quality checks.
 
