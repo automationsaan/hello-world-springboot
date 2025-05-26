@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This is the Maven Project Object Model (POM) file for the hello-world-springboot project.
+    It defines project metadata, dependencies, plugins, and build configuration.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- Project coordinates and metadata -->
+    <groupId>com.example</groupId> <!-- Group (organization) identifier -->
+    <artifactId>hello-world-springboot</artifactId> <!-- Project (artifact) name -->
+    <version>0.0.1-SNAPSHOT</version> <!-- Project version -->
+    <packaging>jar</packaging> <!-- Packaging type -->
+    <name>hello-world-springboot</name> <!-- Display name -->
+    <description>Demo project for Spring Boot Hello World</description>
+    <!-- Inherit defaults from the Spring Boot starter parent -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.6</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <properties>
+        <java.version>21</java.version> <!-- Set Java version for compilation -->
+    </properties>
+    <dependencies>
+        <!-- Spring Boot web starter for building REST APIs -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Spring Boot test starter for unit and integration testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven plugin for packaging and running the app -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
