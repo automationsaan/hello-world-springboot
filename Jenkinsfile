@@ -60,7 +60,7 @@ pipeline {
         //         echo "----------- Quality Gate completed ----------"
         //     }
         // }
-        // Jar Publish stage: uploads the built JAR to Artifactory
+        // Jar Publish stage: uploads the built JAR to Artifactory local repository
         stage('Jar Publish') {
             steps {
                 script {
@@ -69,14 +69,14 @@ pipeline {
                     def server = Artifactory.newServer url:registry+"/artifactory", credentialsId:"jfrog-artifact-cred"
                     // Build properties for traceability (build ID and commit ID)
                     def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
-                    // Upload spec: upload JAR(s) from target/ to Artifactory
+                    // Upload spec: upload JAR(s) from target/ to the correct local repo in Artifactory
                     // 'flat: true' ensures the JAR is uploaded without the 'target/' directory in Artifactory
                     def uploadSpec = """
                         {
                           \"files\": [
                             {
                               \"pattern\": \"target/*.jar\",
-                              \"target\": \"libs-release-local/\",
+                              \"target\": \"hello-world-spring-libs-release-local/\",
                               \"flat\": \"true\",
                               \"props\" : \"${properties}\",
                               \"exclusions\": [ \"*.sha1\", \"*.md5\"]
@@ -84,7 +84,7 @@ pipeline {
                           ]
                         }
                     """
-                    def buildInfo = server.upload(uploadSpec) // Upload the JAR to Artifactory
+                    def buildInfo = server.upload(uploadSpec) // Upload the JAR to Artifactory local repo
                     buildInfo.env.collect() // Collect environment info for traceability
                     server.publishBuildInfo(buildInfo) // Publish build info to Artifactory
                     echo '<--------------- Jar Publish Ended --------------->'
