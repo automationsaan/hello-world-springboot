@@ -5,6 +5,28 @@
 /.idea/
 *.iml
 /.vscode/
+.classpath
+.project
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.ipr
+*.iws
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 # OS files
 .DS_Store
@@ -15,3 +37,15 @@ Thumbs.db
 
 # Compiled class files
 *.class
+
+# Test/coverage reports
+/target/surefire-reports/
+/target/jacoco.exec
+/target/site/jacoco/
+
+# Docker artifacts
+*.jar
+*.war
+*.ear
+*.tar
+*.tar.gz

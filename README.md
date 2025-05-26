@@ -1,6 +1,6 @@
 # Automationsaan Hello World Spring Boot Project
 
-This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube/SonarCloud integration (using both Jenkins and local sonar-project.properties), and automated quality checks.
+This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube/SonarCloud integration (using both Jenkins and local sonar-project.properties), Docker containerization, and automated quality checks.
 
 ## Technologies Used
 
@@ -10,11 +10,13 @@ This repository contains a simple Spring Boot REST API with a Jenkins pipeline f
 - **JUnit 5**: Unit testing framework.
 - **Jenkins**: CI/CD automation server (pipeline defined in `Jenkinsfile`).
 - **SonarQube/SonarCloud**: Static code analysis and quality gate enforcement.
+- **Docker**: Containerization of the Spring Boot application.
 
 ## Project Structure
 
 ```
 hello-world-springboot/
+├── Dockerfile
 ├── Jenkinsfile
 ├── pom.xml
 ├── sonar-project.properties
@@ -25,6 +27,8 @@ hello-world-springboot/
 │   │   └── HelloController.java
 │   └── test/java/com/example/helloworldspringboot/
 │       └── HelloWorldSpringbootApplicationTests.java
+├── target/
+│   └── hello-world-springboot-0.0.1-SNAPSHOT.jar
 ```
 
 ## What the Project Does
@@ -33,12 +37,14 @@ hello-world-springboot/
 - Includes a unit test to verify the application context loads.
 - Jenkins pipeline builds, tests, analyzes, and enforces code quality using SonarQube/SonarCloud.
 - Supports local SonarQube/SonarCloud analysis via `sonar-project.properties`.
+- Builds a Docker image for the Spring Boot application.
 
 ## Setup and Run Locally
 
 ### Prerequisites
 - Java 21 (JDK)
 - Maven 3.9.9 or later
+- Docker (for containerization)
 - (Optional) SonarQube CLI or SonarScanner for local analysis
 
 ### Build and Run
@@ -99,6 +105,22 @@ mvn test
    ```
    (Make sure SonarScanner is installed and available in your PATH.)
 
+### Build and Run with Docker
+1. **Build the JAR:**
+   ```powershell
+   mvn clean package
+   ```
+2. **Build the Docker image:**
+   ```powershell
+   docker build -t hello-world-app .
+   ```
+3. **Run the Docker container:**
+   ```powershell
+   docker run -p 8080:8080 hello-world-app
+   ```
+4. **Access the API:**
+   Open your browser or use curl to visit: [http://localhost:8080/](http://localhost:8080/)
+
 ## Jenkins Pipeline
 
 The `Jenkinsfile` defines the following stages:
@@ -114,6 +136,11 @@ The `Jenkinsfile` defines the following stages:
 - The pipeline expects a SonarQube server named `sonarqube-server` and a scanner tool named `sonar-scanner` to be configured in Jenkins.
 - For local analysis, the `sonar-project.properties` file is used and is compatible with SonarCloud.
 - The Quality Gate stage is commented out by default for SonarCloud free tier users.
+
+## Dockerfile
+- The Dockerfile uses the official OpenJDK 21 image.
+- It copies the built JAR from `target/hello-world-springboot-0.0.1-SNAPSHOT.jar` to `hello-world-app.jar` in the image.
+- The container runs the JAR using `ENTRYPOINT ["java", "-jar", "/hello-world-app.jar"]`.
 
 ## License
 This project is for demonstration and educational purposes.
