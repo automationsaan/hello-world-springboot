@@ -1,4 +1,4 @@
-def registry = 'https://automationsaan.jfrog.io/' // Artifactory base URL
+def registry = 'https://automationsaan.jfrog.io' // Artifactory base URL (no trailing slash)
 // Jenkins Declarative Pipeline definition
 pipeline {
     agent {
@@ -65,26 +65,27 @@ pipeline {
             steps {
                 script {
                     echo '<--------------- Jar Publish Started --------------->'
-                    // Create Artifactory server object
+                    // Create Artifactory server object using the base URL and credentials
                     def server = Artifactory.newServer url:registry+"/artifactory", credentialsId:"jfrog-artifact-cred"
-                    // Build properties for traceability
+                    // Build properties for traceability (build ID and commit ID)
                     def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
                     // Upload spec: upload JAR(s) from target/ to Artifactory
+                    // 'flat: true' ensures the JAR is uploaded without the 'target/' directory in Artifactory
                     def uploadSpec = """
                         {
                           \"files\": [
                             {
                               \"pattern\": \"target/*.jar\",
                               \"target\": \"libs-release-local/\",
-                              \"flat\": \"false\",
+                              \"flat\": \"true\",
                               \"props\" : \"${properties}\",
                               \"exclusions\": [ \"*.sha1\", \"*.md5\"]
                             }
                           ]
                         }
                     """
-                    def buildInfo = server.upload(uploadSpec) // Upload the JAR
-                    buildInfo.env.collect() // Collect environment info
+                    def buildInfo = server.upload(uploadSpec) // Upload the JAR to Artifactory
+                    buildInfo.env.collect() // Collect environment info for traceability
                     server.publishBuildInfo(buildInfo) // Publish build info to Artifactory
                     echo '<--------------- Jar Publish Ended --------------->'
                 }
