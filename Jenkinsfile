@@ -4,7 +4,6 @@ def version   = '0.0.1-SNAPSHOT' // Version of the Docker image
 
 def app // Define app variable globally for Docker build/publish stages
 
-// Jenkins Declarative Pipeline definition
 pipeline {
     agent {
         node {
@@ -12,70 +11,46 @@ pipeline {
         }
     }
     environment {
-        // Set JAVA_HOME and update PATH to use Java 21 and Maven 3.9.9
         JAVA_HOME = "/lib/jvm/java-21-openjdk-amd64"
         PATH = "/opt/apache-maven-3.9.9/bin:$JAVA_HOME/bin:$PATH"
     }
     stages {
-        // Build stage: compiles code and runs all tests
         stage('Build') {
             steps {
-                echo "JAVA VERSION:" // Print Java version for debugging
+                echo "JAVA VERSION:"
                 sh 'java -version'
-                echo "MAVEN VERSION:" // Print Maven version for debugging
+                echo "MAVEN VERSION:"
                 sh 'mvn -version'
                 echo "----------- build started ----------"
-                sh 'mvn clean verify' // Clean, compile, and run tests
+                sh 'mvn clean verify'
                 echo "----------- build completed ----------"
             }
         }
-        // Test stage: generates test reports
         stage('Test') {
             steps {
                 echo "----------- unit test started ----------"
-                sh 'mvn surefire-report:report' // Generate Surefire test report
+                sh 'mvn surefire-report:report'
                 echo "----------- unit test completed ----------"
             }
         }
-        // SonarQube analysis stage: runs static code analysis
         stage('SonarQube analysis') {
             environment {
-                scannerHome = tool 'sonar-scanner' // Use SonarQube scanner tool
+                scannerHome = tool 'sonar-scanner'
             }
             steps {
-                withSonarQubeEnv('sonarqube-server') { // Use SonarQube server credentials
+                withSonarQubeEnv('sonarqube-server') {
                     echo "----------- SonarQube analysis started ----------"
-                    sh "${scannerHome}/bin/sonar-scanner" // Run SonarQube analysis
+                    sh "${scannerHome}/bin/sonar-scanner"
                     echo "----------- SonarQube analysis completed ----------"
                 }
             }
         }
-        // Quality Gate stage: skipped due to SonarCloud premium requirement
-        // stage('Quality Gate') {
-        //     steps {
-        //         echo "----------- Quality Gate started ----------"
-        //         script {
-        //             timeout(time: 15, unit: 'MINUTES') { // Wait up to 15 minutes
-        //                 def qg = waitForQualityGate() // Get quality gate result
-        //                 if (qg.status != 'OK') {
-        //                     error "Pipeline aborted due to quality gate failure: ${qg.status}" // Fail if not OK
-        //                 }
-        //             }
-        //         }
-        //         echo "----------- Quality Gate completed ----------"
-        //     }
-        // }
-        // Jar Publish stage: uploads the built JAR to Artifactory local repository
         stage('Jar Publish') {
             steps {
                 script {
                     echo '<--------------- Jar Publish Started --------------->'
-                    // Create Artifactory server object using the base URL and credentials
                     def server = Artifactory.newServer url:registry+"/artifactory", credentialsId:"jfrog-artifact-cred"
-                    // Build properties for traceability (build ID and commit ID)
                     def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
-                    // Upload spec: upload JAR(s) from target/ to the correct local repo in Artifactory
-                    // 'flat: true' ensures the JAR is uploaded without the 'target/' directory in Artifactory
                     def uploadSpec = """
                         {
                           \"files\": [
@@ -89,30 +64,28 @@ pipeline {
                           ]
                         }
                     """
-                    def buildInfo = server.upload(uploadSpec) // Upload the JAR to Artifactory local repo
-                    buildInfo.env.collect() // Collect environment info for traceability
-                    server.publishBuildInfo(buildInfo) // Publish build info to Artifactory
+                    def buildInfo = server.upload(uploadSpec)
+                    buildInfo.env.collect()
+                    server.publishBuildInfo(buildInfo)
                     echo '<--------------- Jar Publish Ended --------------->'
                 }
             }
         }
-        // Docker Build stage: builds the Docker image using the built JAR
         stage('Docker Build') {
             steps {
                 script {
                     echo '<--------------- Docker Build Started --------------->'
-                    // Build the Docker image and tag it with the version
+                    // Debug: Print current user and groups to verify Docker access
+                    sh 'whoami && groups'
                     app = docker.build(imageName+":"+version)
                     echo '<--------------- Docker Build Ends --------------->'
                 }
             }
         }
-        // Docker Publish stage: pushes the Docker image to Artifactory Docker registry
         stage('Docker Publish') {
             steps {
                 script {
                     echo '<--------------- Docker Publish Started --------------->'
-                    // Authenticate with the Docker registry and push the image
                     docker.withRegistry(registry, 'jfrog-artifact-cred') {
                         app.push()
                     }
