@@ -1,6 +1,6 @@
 # Automationsaan Hello World Spring Boot Project
 
-This repository contains a simple Spring Boot REST API with a complete CI/CD pipeline using Jenkins, SonarQube/SonarCloud, Docker, JFrog Artifactory, and Kubernetes (EKS) for automated deployment, quality checks, and autoscaling. The project demonstrates modern DevOps best practices, including secure configuration and cloud-native deployment.
+This repository contains a simple Spring Boot REST API with a complete CI/CD pipeline using Jenkins, SonarQube/SonarCloud, Docker, JFrog Artifactory, Kubernetes (EKS), and Helm for automated deployment, quality checks, and autoscaling. The project demonstrates modern DevOps best practices, including secure configuration, cloud-native deployment, and Helm-based Kubernetes application management. Helm is used for templated, repeatable deployments, and the pipeline supports both declarative YAML and Helm chart-based deployments.
 
 ## Technologies Used
 
@@ -17,6 +17,7 @@ This repository contains a simple Spring Boot REST API with a complete CI/CD pip
 - **Kubernetes Autoscaling**: Horizontal Pod Autoscaler (HPA) for automatic scaling based on resource usage.
 - **Kubernetes YAML Manifests**: Declarative configuration for deployment, service, namespace, and secrets.
 - **Shell Scripts**: For automated deployment to Kubernetes clusters.
+- **Helm**: Package manager for Kubernetes, used for templated, repeatable deployments (see `Helm Deploy` stage in Jenkinsfile).
 
 ## Project Structure
 
@@ -137,12 +138,12 @@ mvn test
 4. **Access the API:**
    Open your browser or use curl to visit: [http://localhost:8080/](http://localhost:8080/)
 
-### Deploy to Kubernetes (EKS)
+### Deploy to Kubernetes (EKS) with Helm
 1. **Update `kubeconfig` for EKS:**
    ```powershell
    aws eks --region <your-region> update-kubeconfig --name <your-cluster-name>
    ```
-2. **Ensure `deploy.sh` is executable:**
+2. **Ensure `deploy.sh` is executable (if using the legacy script):**
    ```powershell
    chmod +x deploy.sh
    ```
@@ -154,11 +155,13 @@ mvn test
    ```powershell
    kubectl apply -f secret.yaml
    ```
-5. **Deploy the application:**
+5. **Deploy using Helm:**
    ```powershell
-   kubectl apply -f deployment.yaml
+   helm upgrade --install hello-world-springboot hello-world-springboot-0.1.0.tgz
    ```
-6. **Expose the service:**
+   - This command will install or upgrade the application using the Helm chart package.
+   - Ensure the Helm chart (`hello-world-springboot-0.1.0.tgz`) is present in your workspace.
+6. **Expose the service (if not handled by Helm):**
    ```powershell
    kubectl apply -f service.yaml
    ```
@@ -168,6 +171,8 @@ mvn test
    kubectl get svc -n hello-world
    ```
    Open the URL in your browser.
+
+> **Note:** The Jenkins pipeline now uses Helm for deployment. The previous shell script-based deployment (`deploy.sh`) is still available and commented in the Jenkinsfile for reference.
 
 ## Jenkins Pipeline
 
@@ -179,9 +184,10 @@ The `Jenkinsfile` defines the following stages:
 - **Jar Publish**: Uploads the built JAR to JFrog Artifactory.
 - **Docker Build**: Builds the Docker image using the built JAR.
 - **Docker Publish**: Pushes the Docker image to JFrog Artifactory Docker registry.
-- **Kubernetes Deploy**: Deploys the application to EKS.
+- **Helm Deploy**: Deploys the application to EKS using a Helm chart.
+- **(Legacy) Deploy**: (Commented out) Deploys using a shell script for reference.
 
-> Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, Docker, and SonarQube/SonarCloud integration.
+> Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, Docker, Helm, and SonarQube/SonarCloud integration.
 
 ## SonarQube/SonarCloud
 - The pipeline expects a SonarQube server named `sonarqube-server` and a scanner tool named `sonar-scanner` to be configured in Jenkins.

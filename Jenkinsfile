@@ -114,22 +114,50 @@ pipeline {
                     echo '<--------------- Docker Publish Started --------------->'
                     // Authenticate with the Docker registry and push the image
                     docker.withRegistry(registry, 'jfrog-artifact-cred') {
-                        app.push()
+                        app.push() // Push the built Docker image to the registry
                     }
                     echo '<--------------- Docker Publish Ended --------------->'
                 }
             }
         }
-        stage ("Deploy") {
+        // Helm Deploy stage: deploys the application using a Helm chart
+        stage('Helm Deploy') {
             steps {
                 script {
-                    echo '<--------------- Deploy Started --------------->'
-                    // Deploy the Docker image to the Kubernetes cluster
-                    sh './deploy.sh' // Execute the deployment script
-                    // Note: Ensure deploy.sh is executable and correctly configured for your environment
-                    echo '<--------------- Deploy Ended --------------->'
+                    echo '<--------------- Helm Deploy Started --------------->'
+                    // Install or upgrade the Helm release using the provided chart package
+                    sh 'helm upgrade --install hello-world-springboot hello-world-springboot-0.1.0.tgz'
+                    // 'upgrade --install' ensures idempotency: installs if not present, upgrades if already deployed
+                    echo '<--------------- Helm Deploy Ended --------------->'
                 }
             }
         }
+        // Deploy stage: (commented out for future reference)
+        // stage ("Deploy") {
+        //     steps {
+        //         script {
+        //             echo '<--------------- Deploy Started --------------->'
+        //             // Deploy the Docker image to the Kubernetes cluster
+        //             sh './deploy.sh' // Execute the deployment script
+        //             // Note: Ensure deploy.sh is executable and correctly configured for your environment
+        //             echo '<--------------- Deploy Ended --------------->'
+        //         }
+        //     }
+        // }
     }
 }
+// Pipeline end
+//
+// Pipeline Stages:
+// - Build: Compiles and tests the code using Maven
+// - Test: Generates test reports
+// - SonarQube analysis: Runs static code analysis
+// - Jar Publish: Uploads the built JAR to JFrog Artifactory
+// - Docker Build: Builds the Docker image
+// - Docker Publish: Pushes the Docker image to Artifactory Docker registry
+// - Helm Deploy: Deploys the application to Kubernetes using Helm
+//
+// Notes:
+// - Ensure 'ttrend-0.1.0.tgz' Helm chart is present in the workspace
+// - Jenkins must have Docker, Helm, and required credentials configured
+// - The pipeline uses best practices for traceability and secure artifact/image handling
