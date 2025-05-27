@@ -120,5 +120,16 @@ pipeline {
                 }
             }
         }
+        stage ("Deploy") {
+            steps {
+                script {
+                    echo '<--------------- Deploy Started --------------->'
+                    // Deploy the Docker image to the Kubernetes cluster
+                    sh './deploy.sh' // Execute the deployment script
+                    // Note: Ensure deploy.sh is executable and correctly configured for your environment
+                    echo '<--------------- Deploy Ended --------------->'
+                }
+            }
+        }
     }
 }
