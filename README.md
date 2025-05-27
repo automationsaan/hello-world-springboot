@@ -1,6 +1,6 @@
 # Automationsaan Hello World Spring Boot Project
 
-This repository contains a simple Spring Boot REST API with a Jenkins pipeline for CI/CD, SonarQube/SonarCloud integration, Docker containerization, and automated quality checks.
+This repository contains a simple Spring Boot REST API with a complete CI/CD pipeline using Jenkins, SonarQube/SonarCloud, Docker, JFrog Artifactory, and Kubernetes (EKS) for automated deployment, quality checks, and autoscaling. The project demonstrates modern DevOps best practices, including secure configuration and cloud-native deployment.
 
 ## Technologies Used
 
@@ -12,6 +12,11 @@ This repository contains a simple Spring Boot REST API with a Jenkins pipeline f
 - **SonarQube/SonarCloud**: Static code analysis and quality gate enforcement.
 - **Docker**: Containerization of the Spring Boot application.
 - **JFrog Artifactory**: Artifact and Docker image repository.
+- **Kubernetes**: Container orchestration for automated deployment, scaling, and management.
+- **Amazon EKS (Elastic Kubernetes Service)**: Managed Kubernetes cluster for running production workloads in AWS.
+- **Kubernetes Autoscaling**: Horizontal Pod Autoscaler (HPA) for automatic scaling based on resource usage.
+- **Kubernetes YAML Manifests**: Declarative configuration for deployment, service, namespace, and secrets.
+- **Shell Scripts**: For automated deployment to Kubernetes clusters.
 
 ## Project Structure
 
@@ -22,6 +27,11 @@ hello-world-springboot/
 ├── pom.xml
 ├── sonar-project.properties
 ├── README.md
+├── deploy.sh
+├── deployment.yaml
+├── namespace.yaml
+├── secret.yaml
+├── service.yaml
 ├── src/
 │   ├── main/java/com/example/helloworldspringboot/
 │   │   ├── HelloWorldSpringbootApplication.java
@@ -40,6 +50,8 @@ hello-world-springboot/
 - Publishes the built JAR to JFrog Artifactory.
 - Builds and publishes a Docker image to JFrog Artifactory Docker registry.
 - Supports local SonarQube/SonarCloud analysis via `sonar-project.properties`.
+- Deploys the application to Kubernetes (EKS) using declarative YAML manifests.
+- Supports Kubernetes autoscaling and secure secret management.
 
 ## Setup and Run Locally
 
@@ -48,6 +60,8 @@ hello-world-springboot/
 - Maven 3.9.9 or later
 - Docker (for containerization)
 - (Optional) SonarQube CLI or SonarScanner for local analysis
+- kubectl (Kubernetes command-line tool)
+- AWS CLI (for EKS deployment)
 
 ### Build and Run
 
@@ -123,6 +137,38 @@ mvn test
 4. **Access the API:**
    Open your browser or use curl to visit: [http://localhost:8080/](http://localhost:8080/)
 
+### Deploy to Kubernetes (EKS)
+1. **Update `kubeconfig` for EKS:**
+   ```powershell
+   aws eks --region <your-region> update-kubeconfig --name <your-cluster-name>
+   ```
+2. **Ensure `deploy.sh` is executable:**
+   ```powershell
+   chmod +x deploy.sh
+   ```
+3. **Create the namespace:**
+   ```powershell
+   kubectl apply -f namespace.yaml
+   ```
+4. **Create the secret:**
+   ```powershell
+   kubectl apply -f secret.yaml
+   ```
+5. **Deploy the application:**
+   ```powershell
+   kubectl apply -f deployment.yaml
+   ```
+6. **Expose the service:**
+   ```powershell
+   kubectl apply -f service.yaml
+   ```
+7. **Access the application:**
+   Get the service URL:
+   ```powershell
+   kubectl get svc -n hello-world
+   ```
+   Open the URL in your browser.
+
 ## Jenkins Pipeline
 
 The `Jenkinsfile` defines the following stages:
@@ -133,6 +179,7 @@ The `Jenkinsfile` defines the following stages:
 - **Jar Publish**: Uploads the built JAR to JFrog Artifactory.
 - **Docker Build**: Builds the Docker image using the built JAR.
 - **Docker Publish**: Pushes the Docker image to JFrog Artifactory Docker registry.
+- **Kubernetes Deploy**: Deploys the application to EKS.
 
 > Ensure Jenkins is configured with a node labeled `maven`, Java 21, Maven 3.9.9, Docker, and SonarQube/SonarCloud integration.
 
